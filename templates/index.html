@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TODO List App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        function editTask(taskId, taskTitle, taskDueDate) {
+            document.querySelector('input[name="title"]').value = taskTitle;
+            document.querySelector('input[name="due_date"]').value = taskDueDate ? new Date(taskDueDate).toISOString().slice(0, 16) : '';
+            document.querySelector('input[name="task_id"]').value = taskId;
+            document.getElementById('submit-btn').innerText = "Update Task";
+        }
+
+        function clearForm() {
+            document.querySelector('input[name="title"]').value = '';
+            document.querySelector('input[name="due_date"]').value = '';
+            document.querySelector('input[name="task_id"]').value = '';
+            document.getElementById('submit-btn').innerText = "Add Task";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>TODO List Application</h1>
+        </header>
+        
+        <form action="/add_or_update" method="POST">
+            <div class="input-box">
+                <input type="text" name="title" placeholder="Enter a new task" required>
+                <input type="datetime-local" name="due_date" placeholder="Set due date and time">
+                <input type="hidden" name="task_id">
+            </div>
+            <button type="submit" id="submit-btn" class="add-btn">Add Task</button>
+        </form>
+
+        <ul id="task-list">
+            {% for task in tasks %}
+            <li class="task-item">
+                <span class="{% if not task.complete %}incomplete{% else %}complete{% endif %}">{{ task.title }}</span>
+                <span class="due-date">{{ task.due_date.strftime('%Y-%m-%d %H:%M') if task.due_date else 'No Due Date' }}</span>
+
+                <a href="javascript:void(0);" onclick="editTask('{{ task.id }}', '{{ task.title }}', '{{ task.due_date }}')" class="edit-btn">Edit</a>
+                <a href="/delete/{{ task.id }}" class="delete-btn">Delete</a>
+                <a href="/toggle/{{ task.id }}" class="complete-btn {% if task.complete %}completed{% else %}incomplete{% endif %}">
+                    {% if task.complete %}Complete{% else %}Incomplete{% endif %}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        <button onclick="clearForm()">Clear Form</button>
+    </div>
+</body>
+</html>
