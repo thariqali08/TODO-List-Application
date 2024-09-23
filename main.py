@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -11,6 +11,7 @@ app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///'+os.path.join(basedir,'todo.sq
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY']="star/cloud/0821"
 db = SQLAlchemy(app)
+
 
 # Task model
 class Task(db.Model):
@@ -37,19 +38,29 @@ def add_or_update_task():
     task_title = request.form.get('title')
     task_due_date = request.form.get('due_date')
 
-    if task_due_date:
+    
+     # Convert due_date to datetime object
+    try:
         due_date = datetime.strptime(task_due_date, '%Y-%m-%dT%H:%M')
-    else:
-        due_date = None
+    except ValueError:
+        flash("Invalid date format. Please use the correct date and time format.")
+        return redirect(url_for('index'))
+
+    # Check if the due date is today or in the future
+    if due_date < datetime.now():
+        flash("Cannot add a task with a past due date.")
+        return redirect(url_for('index'))
 
     if task_id:  # If task_id is present, update the task
         task = Task.query.get(task_id)
         task.title = task_title
         task.due_date = due_date
+
     else:  # Otherwise, create a new task
         new_task = Task(title=task_title, due_date=due_date)
         db.session.add(new_task)
-
+    
+    
     db.session.commit()
     return redirect(url_for('index'))
 

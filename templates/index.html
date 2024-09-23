@@ -13,12 +13,6 @@
             document.getElementById('submit-btn').innerText = "Update Task";
         }
 
-        function clearForm() {
-            document.querySelector('input[name="title"]').value = '';
-            document.querySelector('input[name="due_date"]').value = '';
-            document.querySelector('input[name="task_id"]').value = '';
-            document.getElementById('submit-btn').innerText = "Add Task";
-        }
     </script>
 </head>
 <body>
@@ -26,7 +20,20 @@
         <header>
             <h1>TODO List Application</h1>
         </header>
-        
+
+        <!-- Flash messages section -->
+        <div class="flash-messages">
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+
         <form action="/add_or_update" method="POST">
             <div class="input-box">
                 <input type="text" name="title" placeholder="Enter a new task" required>
@@ -50,8 +57,6 @@
             </li>
             {% endfor %}
         </ul>
-
-        <button onclick="clearForm()">Clear Form</button>
     </div>
 </body>
 </html>
